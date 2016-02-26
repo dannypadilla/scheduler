@@ -1,39 +1,39 @@
 package scheduler.classes;
 
-import java.util.Date;
+import java.time.LocalTime;
+//import java.util.Date;
 
 public class Student {
 	
-	private Date date;
-	private String time;
+//	private Date date;
+	private String day;
+	private LocalTime time;
 	private String name;
-	private int row;
-	private int column;
 	
 	public Student() {
 		
 	}
 	
-	public Student(Date date, String time, String name) {
+	public Student(String day, LocalTime time, String name) {
 		super();
-		this.date = date;
+		this.day = day;
 		this.time = time;
 		this.name = name;
 	}
 
-	public Date getDate() {
-		return date;
+	public String getDay() {
+		return day;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setDay(String day) {
+		this.day = day;
 	}
 
-	public String getTime() {
+	public LocalTime getTime() {
 		return time;
 	}
 
-	public void setTime(String time) {
+	public void setTime(LocalTime time) {
 		this.time = time;
 	}
 
@@ -44,9 +44,5 @@ public class Student {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
-	
-	
 
 }

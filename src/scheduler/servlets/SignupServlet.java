@@ -2,11 +2,15 @@ package scheduler.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,13 +26,13 @@ public class SignupServlet extends HttpServlet {
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
 		response.setContentType("text/html");		
 		ServletContext context = this.getServletContext();
 		
-		PrintWriter out = response.getWriter();
+		String day = (String) context.getAttribute("day");
+		LocalTime time = (LocalTime) context.getAttribute("time");
 		
-		Student student = (Student) request.getAttribute("student");
+		PrintWriter out = response.getWriter();
 		
 		out.println("<!doctype html>");
 		out.println("<html>");
@@ -57,12 +61,15 @@ public class SignupServlet extends HttpServlet {
 
 		out.println("								<div class=\"input-group\">");
 		out.println("									<div class=\"input-group-addon\">");
-		out.println("										<span>Request Date & Time</span>");
+		out.println("										<p>Request Date & Time:</p>");
 		out.println("									</div>");
-		out.println("									<input class=\"form-control\" type=\"text\" name=\"dateTime\" placeholder=\"Enter your first and last name\" />");
+		out.println("									<div class=\"input-group-addon\" id=\"basic-addon2\">");
+		out.println("										<span>" + day + " at " + time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) + "</span>");
+		out.println("									</div>");
+		out.println("									<input class=\"form-control\" type=\"hidden\" name=\"dateTime\" />");
 		out.println("								</div>");
 
-		out.println("							</div>");
+		out.println("			   </div>");
 		out.println("");
 		
 		if (request.getAttribute("nameError") != null) {
@@ -92,12 +99,16 @@ public class SignupServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ServletContext context = this.getServletContext();
+		
+		String day = (String) context.getAttribute("day");
+		LocalTime time = (LocalTime) context.getAttribute("time") ;
 		
 		String name = (String) request.getParameter("name");
 		
 		boolean hasError = false;
 		
-		if (name == null || name.equals("") ) {
+		if (name == null || name.trim().equals("") ) {
 			hasError = true;
 		}
 		
@@ -106,14 +117,13 @@ public class SignupServlet extends HttpServlet {
 			doGet(request, response);
 			
 		} else { 
-
-			request.setAttribute("registered", "Registered!");
-			ServletContext context = this.getServletContext();
-					
-			ArrayList<Student> mailingList = (ArrayList<Student>) context.getAttribute("studentList");
-//			mailingList.add(user);
+			
+			Cookie cookie = new Cookie("name", name);
+			response.addCookie(cookie);
+			
+			ArrayList<Student> studentList = (ArrayList<Student>) context.getAttribute("studentList");
+			studentList.add(new Student(day, time, name) );
 			response.sendRedirect("Scheduler");
-//			doGet(request, response);
 		}
 		
 	}

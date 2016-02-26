@@ -28,6 +28,7 @@ public class SchedulerServlet extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		ServletContext context = this.getServletContext();
+		
 		if (context.getAttribute("studentList") == null) {
 			context.setAttribute("studentList", new ArrayList<Student>() );
 		}
@@ -69,6 +70,17 @@ public class SchedulerServlet extends HttpServlet {
 			startTime++;
 		}
 		
+		if (everyHalfHour) {
+			hoursOfOpenSchedule *= 2;
+		} else if (everyQuarterHour) {
+			hoursOfOpenSchedule *= 4;
+		}
+		
+		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+		
+		
+		boolean hasCookie = false;
+		
 		out.println("<!doctype html>");
 		out.println("<html>");
 		out.println("	<head>");
@@ -86,7 +98,7 @@ public class SchedulerServlet extends HttpServlet {
 		out.println("						<h1>Presentation Scheduler</h1>");
 		out.println("						<h3><small>Signup for a time slot</small></h3>");
 		out.println("						<hr />");
-		out.println("            <form action=\"Signup\" method=\"post\">");
+		out.println("            <form action=\"Scheduler\" method=\"post\">");
 		out.println("						<table class=\"table table-bordered table-striped table-hover\">");
 		out.println("							<tr>");
 		out.println("								<th>Time</th>");
@@ -97,50 +109,31 @@ public class SchedulerServlet extends HttpServlet {
 		out.println("								<th>Friday</th>");
 		out.println("							</tr>");
 		
-		int countRow = 0;
-		String amPM = "AM";
-		
-		if (everyHalfHour) {
-			hoursOfOpenSchedule *= 2;
-		} else if (everyQuarterHour) {
-			hoursOfOpenSchedule *= 4;
-		}
-		
 		for (int i = 0; i < hoursOfOpenSchedule; i++) {
+			
 			out.println("							<tr>");
 			
-			out.println("								<td>" + localTime.get(i).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) +
-														"<input type = \"hidden\" name=\"time\" value=\"enter\">" +
-														"</td>");
-			out.println("								<td>" + "<input type=\"submit\" value=\"Search\" />" +
-														"<input type = \"hidden\" name=\"day\" value=\"Monday\">" +
-														"</td>");
-			out.println("								<td>" + "<input type=\"submit\" value=\"Search\" />" +
-														"<input type = \"hidden\" name=\"day\" value=\"Tuesday\">" +
-														"</td>");
-			out.println("								<td>" + "<input type=\"submit\" value=\"Search\" />" +
-														"<input type = \"hidden\" name=\"day\" value=\"Wednesday\">" +
-														"</td>");
-			out.println("								<td>" + "<input type=\"submit\" value=\"Search\" />" +
-														"<input type = \"hidden\" name=\"day\" value=\"Thursday\">" +
-														"</td>");
-			out.println("								<td>" + "<input type=\"submit\" value=\"Search\" />" +
-														"<input type = \"hidden\" name=\"day\" value=\"Friday\">" +
-														"</td>");
+			out.println("								<td>");
+			out.println(									localTime.get(i).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) );
+			out.println("									<input type = \"hidden\" name=\"time\" value=\" " + localTime.get(i) + " \">");
+			out.println("									<input type = \"hidden\" name=\"row\" value=\" " + i + " \">");
+			out.println("								</td>");
 			
-			out.println("								<input type = \"hidden\" name=\"row\" value=\" " + countRow + " \">");
-			out.println("								<input type = \"hidden\" name=\"hour\" value=\" " + localTime.get(i) + " \">");
-			out.println("								<input type = \"hidden\" name=\"amPM\" value=\" " + amPM + " \">");
-			countRow++;
-			
-			out.println("							</tr>");
+			for(int j = 0; j < days.length; j++) {
+				out.println("								<td>");
+				out.println("									<input type=\"submit\" name=\"submit\" value=\"Select\" />");
+				out.println("									<input type=\"hidden\" name=\"day\" value=\"" + days[j] + " \">");
+				out.println("									<input type=\"hidden\" name=\"column\" value=\" " + j + " \">");
+				out.println("								</td>");
+				}
+				
+				out.println("							</tr>");
 			
 		}
+		
 		out.println("						</table>");
 		out.println("						</form>");
-		out.println("						<p class=\"text-center\">");
-		out.println("							<a href=\"NewsletterSignup\">Back to Sign-Up</a>");
-		out.println("						</p>");
+
 		out.println("					</div>");
 		out.println("				</div>");
 		out.println("			</div>");
@@ -152,33 +145,31 @@ public class SchedulerServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ServletContext context = this.getServletContext();
 		
-//		String time = (String) request.getParameter("time");
-//		String date = (String) request.getParameter("day");
-//		String countRow = (String) request.getParameter("countRow");
-//		String hour = (String) request.getParameter("hour");
-//		String minute = (String) request.getParameter("minute");
-//		String amPM = (String) request.getParameter("amPM");
+		String[] s = request.getParameterValues("column");
 		
-		String time = (String) request.getParameter("time");
-		String date = (String) request.getParameter("day");
-		String countRow = (String) request.getParameter("countRow");
-		String hour = (String) request.getParameter("hour");
-		String minute = (String) request.getParameter("minute");
-		String amPM = (String) request.getParameter("amPM");
+		String day = request.getParameter("day");
+		LocalTime time = LocalTime.parse(request.getParameter("time").trim() );
+		String row = request.getParameter("row");
+		String column = request.getParameter("column");
+
+		context.setAttribute("day", day);
+		context.setAttribute("time", time);
 		
-		Student student = new Student();
-		
-		student.setTime(time);
-		
-		request.setAttribute("student", student);
-		
-//		ArrayList<Student> studentList = (ArrayList<Student>) request.getAttribute("studentList");
+//		System.out.println(day);
+//		System.out.println(time);
+//		System.out.println(row);
+//		System.out.println(column);
+		for(int i = 0; i < s.length; i++) {
+			System.out.println(s[i]);
+		}
+		System.out.println(s);
 		
 		
-		
-		
+		// for testing otherwise delete and uncomment redirect
 		doGet(request, response);
+//		response.sendRedirect("Signup");
 	}
 
 }
